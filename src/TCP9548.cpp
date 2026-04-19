@@ -53,12 +53,14 @@ bool TCP9548::selectChannel(uint8_t channel) {
 
 bool TCP9548::enableChannel(uint8_t channel) {
   uint8_t control = 0;
-  const uint8_t bit = channelBit(channel);
+  uint8_t bit = 0;
 
   if (!isValidChannel(channel)) {
     setError("invalid channel");
     return false;
   }
+
+  bit = channelBit(channel);
   if (!readControl(control)) {
     return false;
   }
@@ -66,18 +68,21 @@ bool TCP9548::enableChannel(uint8_t channel) {
     setError("ok");
     return true;
   }
+
   control = static_cast<uint8_t>(control | bit);
   return writeControlVerified(control);
 }
 
 bool TCP9548::disableChannel(uint8_t channel) {
   uint8_t control = 0;
-  const uint8_t bit = channelBit(channel);
+  uint8_t bit = 0;
 
   if (!isValidChannel(channel)) {
     setError("invalid channel");
     return false;
   }
+
+  bit = channelBit(channel);
   if (!readControl(control)) {
     return false;
   }
@@ -85,6 +90,7 @@ bool TCP9548::disableChannel(uint8_t channel) {
     setError("ok");
     return true;
   }
+
   control = static_cast<uint8_t>(control & static_cast<uint8_t>(~bit));
   return writeControlVerified(control);
 }
@@ -100,6 +106,7 @@ bool TCP9548::readChannelEnabled(uint8_t channel, bool& enabled) {
   if (!readControl(control)) {
     return false;
   }
+
   enabled = (control & channelBit(channel)) != 0;
   setError("ok");
   return true;
@@ -131,10 +138,18 @@ bool TCP9548::readControlRaw(uint8_t& control) {
   }
   return true;
 #else
-  (void)bus_;
-  control = 0xFF;
-  setError("not implemented");
-  return false;
+  if (bus_ == nullptr) {
+    control = 0xFF;
+    setError("bus not configured");
+    return false;
+  }
+
+  if (I2CRead(bus_, address_, &control, 1) != 1) {
+    control = 0xFF;
+    setError("I2C read failed");
+    return false;
+  }
+  return true;
 #endif
 }
 
@@ -152,15 +167,24 @@ bool TCP9548::writeControlRaw(uint8_t control) {
   }
   return true;
 #else
-  (void)bus_;
-  (void)control;
-  setError("not implemented");
-  return false;
+  uint8_t data = control;
+
+  if (bus_ == nullptr) {
+    setError("bus not configured");
+    return false;
+  }
+
+  if (I2CWrite(bus_, address_, &data, 1) != 1) {
+    setError("I2C write failed");
+    return false;
+  }
+  return true;
 #endif
 }
 
 bool TCP9548::writeControlVerified(uint8_t control) {
   uint8_t verify = 0xFF;
+
   if (!writeControlRaw(control)) {
     return false;
   }
@@ -171,6 +195,7 @@ bool TCP9548::writeControlVerified(uint8_t control) {
     setError("verify mismatch");
     return false;
   }
+
   setError("ok");
   return true;
 }

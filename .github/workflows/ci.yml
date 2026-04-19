@@ -21,10 +21,53 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Show toolchain
+      - name: Show host toolchain
         run: |
           c++ --version
           make --version
 
       - name: Run host test suite
         run: make clean test
+
+  compile-hardware-smoke:
+    name: Compile HardwareSmoke (${{ matrix.fqbn }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        fqbn:
+          - arduino:avr:uno
+          - arduino:renesas_uno:minima
+          - arduino:renesas_uno:unor4wifi
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Arduino CLI
+        uses: arduino/setup-arduino-cli@v2
+        with:
+          version: "1.x"
+
+      - name: Show Arduino CLI version
+        run: arduino-cli version
+
+      - name: Update core index
+        run: arduino-cli core update-index
+
+      - name: Install board cores
+        run: |
+          arduino-cli core install arduino:avr
+          arduino-cli core install arduino:renesas_uno
+
+      - name: Install library dependencies
+        run: |
+          arduino-cli lib install BitBang_I2C
+
+      - name: Compile HardwareSmoke
+        run: |
+          arduino-cli compile \
+            --fqbn "${{ matrix.fqbn }}" \
+            --warnings all \
+            --library . \
+            examples/HardwareSmoke
