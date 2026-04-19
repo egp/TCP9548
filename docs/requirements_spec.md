@@ -129,7 +129,7 @@ TCP9548 shall provide enableChannel(channel) that sets the corresponding bit whi
 TCP9548 shall provide disableChannel(channel) that clears the corresponding bit while leaving other bits unchanged.
 
 #### 4.4.5
-TCP9548 shall provide isChannelEnabled(channel, enabled) or equivalent functionality derivable from readChannelMask().
+TCP9548 shall provide readChannelEnabled(channel, enabled) or equivalent functionality derivable from readChannelMask().
 
 #### 4.4.6
 Channel arguments outside 0..7 shall be rejected as invalid input.
