@@ -3,7 +3,7 @@
 
 #if defined(ARDUINO)
 #include <Arduino.h>
-#include <BitBang_I2C.h>
+#include <TCP3231.h>
 #else
 #include <stdint.h>
 class BBI2C;

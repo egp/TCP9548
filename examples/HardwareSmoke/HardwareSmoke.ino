@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <BitBang_I2C.h>
+#include <TCP3231.h>
 #include <TCP9548.h>
 
 #include <ctype.h>

@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out repository
+      - name: Check out TCP9548
         uses: actions/checkout@v4
 
       - name: Show host toolchain
@@ -41,8 +41,20 @@ jobs:
           - arduino:renesas_uno:unor4wifi
 
     steps:
-      - name: Check out repository
+      - name: Check out TCP9548
         uses: actions/checkout@v4
+
+      - name: Check out TCP3231 dependency
+        uses: actions/checkout@v4
+        with:
+          repository: egp/TCP3231
+          path: ${{ github.workspace }}/_deps/TCP3231
+
+      - name: Check out TCP1819 dependency
+        uses: actions/checkout@v4
+        with:
+          repository: egp/TCP1819
+          path: ${{ github.workspace }}/_deps/TCP1819
 
       - name: Install Arduino CLI
         uses: arduino/setup-arduino-cli@v2
@@ -60,9 +72,13 @@ jobs:
           arduino-cli core install arduino:avr
           arduino-cli core install arduino:renesas_uno
 
-      - name: Install library dependencies
+      - name: Stage library dependencies
         run: |
-          arduino-cli lib install BitBang_I2C
+          mkdir -p "$HOME/Arduino/libraries"
+          rm -rf "$HOME/Arduino/libraries/TCP3231"
+          rm -rf "$HOME/Arduino/libraries/TCP1819"
+          cp -R "${{ github.workspace }}/_deps/TCP3231" "$HOME/Arduino/libraries/TCP3231"
+          cp -R "${{ github.workspace }}/_deps/TCP1819" "$HOME/Arduino/libraries/TCP1819"
 
       - name: Compile HardwareSmoke
         run: |
