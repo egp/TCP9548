@@ -44,32 +44,65 @@ bool TCP9548::writeControl(uint8_t control) {
 }
 
 bool TCP9548::selectChannel(uint8_t channel) {
-  (void)channel;
-  setError("stub");
-  return false;
+  if (!isValidChannel(channel)) {
+    setError("invalid channel");
+    return false;
+  }
+  return writeControl(channelBit(channel));
 }
 
 bool TCP9548::enableChannel(uint8_t channel) {
-  (void)channel;
-  setError("stub");
-  return false;
+  uint8_t control = 0;
+  const uint8_t bit = channelBit(channel);
+
+  if (!isValidChannel(channel)) {
+    setError("invalid channel");
+    return false;
+  }
+  if (!readControl(control)) {
+    return false;
+  }
+  if ((control & bit) != 0) {
+    setError("ok");
+    return true;
+  }
+  control = static_cast<uint8_t>(control | bit);
+  return writeControlVerified(control);
 }
 
 bool TCP9548::disableChannel(uint8_t channel) {
-  (void)channel;
-  setError("stub");
-  return false;
-}
+  uint8_t control = 0;
+  const uint8_t bit = channelBit(channel);
 
-bool TCP9548::disableAllChannels() {
-  return writeControl(0x00);
+  if (!isValidChannel(channel)) {
+    setError("invalid channel");
+    return false;
+  }
+  if (!readControl(control)) {
+    return false;
+  }
+  if ((control & bit) == 0) {
+    setError("ok");
+    return true;
+  }
+  control = static_cast<uint8_t>(control & static_cast<uint8_t>(~bit));
+  return writeControlVerified(control);
 }
 
 bool TCP9548::readChannelEnabled(uint8_t channel, bool& enabled) {
-  (void)channel;
+  uint8_t control = 0;
+
   enabled = false;
-  setError("stub");
-  return false;
+  if (!isValidChannel(channel)) {
+    setError("invalid channel");
+    return false;
+  }
+  if (!readControl(control)) {
+    return false;
+  }
+  enabled = (control & channelBit(channel)) != 0;
+  setError("ok");
+  return true;
 }
 
 bool TCP9548::reset() {
@@ -83,6 +116,7 @@ bool TCP9548::reset() {
 const char* TCP9548::errorString() const {
   return lastError_;
 }
+
 bool TCP9548::readControlRaw(uint8_t& control) {
 #if defined(TCP9548_HOST_TEST)
   (void)bus_;

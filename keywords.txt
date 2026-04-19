@@ -1,10 +1,13 @@
+
+## Replace `keywords.txt`
+
+```text
 TCP9548	KEYWORD1
 readControl	KEYWORD2
 writeControl	KEYWORD2
 selectChannel	KEYWORD2
 enableChannel	KEYWORD2
 disableChannel	KEYWORD2
-disableAllChannels	KEYWORD2
 readChannelEnabled	KEYWORD2
 reset	KEYWORD2
 errorString	KEYWORD2

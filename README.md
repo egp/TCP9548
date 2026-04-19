@@ -10,8 +10,8 @@ Current contents:
 - requirements spec
 - initial repo scaffolding
 - host-test harness
-- first red-cycle WB tests
-- intentionally incorrect production stubs
+- early WB tests
+- partial production implementation
 
 ## Design goals
 
@@ -44,7 +44,6 @@ public:
   bool selectChannel(uint8_t channel);
   bool enableChannel(uint8_t channel);
   bool disableChannel(uint8_t channel);
-  bool disableAllChannels();
 
   bool readChannelEnabled(uint8_t channel, bool& enabled);
 
